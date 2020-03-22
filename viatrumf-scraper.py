@@ -62,7 +62,7 @@ class ViatrumfSpider(scrapy.Spider):
     def __parseAndPersist(self, response):
         nettbutikkar = self.__trimAwayClutter(response.body.decode('unicode_escape'))
         
-        self.tidspunkt = datetime.now(pytz.timezone('Europe/Oslo')).strftime('%Y%m%dT%H%M%S')
+        self.tidspunkt = datetime.now(pytz.timezone('Europe/Oslo')).strftime('%Y%m%dT%H%M%SZ')
         for nettbutikk in nettbutikkar:
             self.__save(self.__toPersistable(nettbutikk))
 
@@ -80,7 +80,7 @@ class ViatrumfSpider(scrapy.Spider):
         doc_ref = db.collection('viatrumf-scraper').document(name)
         doc_ref.set(nettbutikk)
 
-def fetch():
+def run(d, f):
     runner = crawler.CrawlerRunner({
         'USER_AGENT': 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
     })
@@ -93,9 +93,6 @@ def fetch():
     d = runner.join()
     d.addBoth(lambda _: reactor.stop())
     reactor.run()
-
-def run(d, f):
-    fetch()
 
 if runningLocally:
     try:
