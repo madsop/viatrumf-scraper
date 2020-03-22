@@ -6,18 +6,26 @@ from os import path
 from os import makedirs
 
 import pytz
-import re
 import scrapy.http.request
 import scrapy.spiders
 import scrapy.crawler as crawler
-from collections import OrderedDict
 from bs4 import BeautifulSoup
-from urllib.parse import urlencode, urljoin
-if runningLocally == False:
-    from google.cloud import storage
-import json
 from datetime import datetime
 from twisted.internet import reactor
+
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+
+if runningLocally:
+    cred = credentials.Certificate('viatrumf-scraper-271913-1e8fcedf7e5b.json')
+    firebase_admin.initialize_app(cred)
+else:
+    cred = credentials.ApplicationDefault()
+    firebase_admin.initialize_app()
+
+db = firestore.client()
+
 
 class Nettbutikk:
     def __init__(self, ahref):
@@ -37,33 +45,14 @@ class ClutterTrimmer:
         return butikkar
 
 class Persister:
-    def __init__(self, target_username):
-        self.target_username = target_username
+    def __init__(self):
+        self.tidspunkt = self.__getToday().strftime('%Y%m%d_%H%M%S')
 
-    def __upload_blob(self, bucket_name, blob_text, destination_blob_name):
-        """Uploads a file to the bucket."""
-        storage_client = storage.Client()
-        bucket = storage_client.get_bucket(bucket_name)
-        blob = bucket.blob(destination_blob_name)
+    def save(self, nettbutikk):
+        name = nettbutikk['namn'].replace(' ', '_') + "_" + self.tidspunkt + '.json'
+        doc_ref = db.collection('viatrumf-scraper').document(name)
+        doc_ref.set(nettbutikk)
 
-        blob.upload_from_string(blob_text)
-
-        int('File uploaded to {}.'.format(destination_blob_name))
-
-    def __saveToLocalFile(self, name, nettbutikk):
-        folder = self.__getFolder()
-        if not (path.exists(folder)):
-            makedirs(folder)
-        with open(folder + name, 'w', encoding='utf-8') as outfile:
-            json.dump(nettbutikk, outfile, ensure_ascii=False)
-
-    def writeToFile(self, nettbutikk):
-        name = nettbutikk['namn'].replace(' ', '_') + "_" + self.__getToday().strftime('%Y%m%d_%H%M%S') + '.json'
-        if (runningLocally):
-            self.__saveToLocalFile(name, nettbutikk)
-        else:
-            self.__upload_blob('viatrumf', json.dumps(nettbutikk, ensure_ascii=False), self.__getFolder() + name)
-    
     def __getFolder(self):
         return  'nettbutikkar/' + self.__getToday().strftime('%Y%m%d') +'/'
 
@@ -87,13 +76,11 @@ class ViatrumfSpider(scrapy.Spider):
             print(e)
 
     def _parseAndPersist(self, response):
-        body = response.body.decode('unicode_escape')
-        nettbutikkar = ClutterTrimmer().trimAwayClutter(body)
+        nettbutikkar = ClutterTrimmer().trimAwayClutter(response.body.decode('unicode_escape'))
         
-        persister = Persister(self.target_username)
+        persister = Persister()
         for nettbutikk in nettbutikkar:
-            nettbutikkPersistable = self.__toPersistable(nettbutikk)
-            persister.writeToFile(nettbutikkPersistable)
+            persister.save(self.__toPersistable(nettbutikk))
 
     def __toPersistable(self, nettbutikk):
         persistable = {}
@@ -109,7 +96,7 @@ def fetch():
     })
     
     kategoriar = ['reise', 'mote', 'sport', 'elektronikk', 'bolig', 'velvære', 'underholdning', 'barn', 'tjenester']
-
+    
     for kategori in kategoriar:
         runner.crawl(ViatrumfSpider, target_username=kategori)
 
@@ -119,9 +106,6 @@ def fetch():
 
 def run(d, f):
     fetch()
-
-def runSingleParam(d):
-    run(d, None)
 
 if runningLocally:
     try:
