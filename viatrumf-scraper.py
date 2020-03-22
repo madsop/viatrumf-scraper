@@ -16,11 +16,9 @@ from firebase_admin import firestore
 runningLocally = eval(getenv('runningLocally', True))
 
 if runningLocally:
-    print('executing locally')
     cred = credentials.Certificate('viatrumf-scraper-271913-1e8fcedf7e5b.json')
     firebase_admin.initialize_app(cred)
 else:
-    print('executing gcp')
     cred = credentials.ApplicationDefault()
     firebase_admin.initialize_app()
 
@@ -82,7 +80,6 @@ class ViatrumfSpider(scrapy.Spider):
         doc_ref.set(nettbutikk)
 
 def run(d, f):
-    print('starting...')
     runner = crawler.CrawlerRunner({
         'USER_AGENT': 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
     })
