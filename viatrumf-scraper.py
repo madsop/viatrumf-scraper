@@ -41,12 +41,12 @@ class ViatrumfSpider(scrapy.Spider):
     top_url = 'https://viatrumf.no/kategori'
     start_urls = ( top_url, )
 
-    def __init__(self, target_username):
-        self.target_username = target_username 
+    def __init__(self, kategori):
+        self.kategori = kategori 
 
     def parse(self, response):
         try: 
-            url = '{top_url}/{username}'.format(top_url=self.top_url, username=self.target_username)
+            url = '{top_url}/{kategori}'.format(top_url=self.top_url, kategori=self.kategori)
             return scrapy.Request(url, callback=self.__parseAndPersist)
         except Exception as e:
             print(e)
@@ -73,6 +73,7 @@ class ViatrumfSpider(scrapy.Spider):
         persistable['href'] = nettbutikk.href
         persistable['popularitet'] = nettbutikk.popularitet
         persistable['timestamp'] = self.tidspunkt
+        persistable['kategori'] = self.kategori
         return persistable
     
     def __save(self, nettbutikk):
@@ -88,7 +89,7 @@ def run(d, f):
     kategoriar = ['reise', 'mote', 'sport', 'elektronikk', 'bolig', 'velvære', 'underholdning', 'barn', 'tjenester']
     
     for kategori in kategoriar:
-        runner.crawl(ViatrumfSpider, target_username=kategori)
+        runner.crawl(ViatrumfSpider, kategori=kategori)
 
     d = runner.join()
     d.addBoth(lambda _: reactor.stop())
