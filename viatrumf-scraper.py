@@ -1,5 +1,5 @@
 # coding=utf-8
-runningLocally = True
+runningLocally = False
 
 from os import getenv
 from os import path
@@ -35,30 +35,6 @@ class Nettbutikk:
         self.popularitet = attrs['data-popularity']
         self.href = attrs['href']
 
-class ClutterTrimmer:
-    def trimAwayClutter(self, body):
-        soup = BeautifulSoup(body, 'html.parser')
-        butikkar = []
-        for nettbutikk in soup.find_all('a', class_='shop-button'):
-            if not nettbutikk.attrs['data-name'] == 'zzzz':
-                butikkar.append(Nettbutikk(nettbutikk))
-        return butikkar
-
-class Persister:
-    def __init__(self):
-        self.tidspunkt = self.__getToday().strftime('%Y%m%d_%H%M%S')
-
-    def save(self, nettbutikk):
-        name = nettbutikk['namn'].replace(' ', '_') + "_" + self.tidspunkt + '.json'
-        doc_ref = db.collection('viatrumf-scraper').document(name)
-        doc_ref.set(nettbutikk)
-
-    def __getFolder(self):
-        return  'nettbutikkar/' + self.__getToday().strftime('%Y%m%d') +'/'
-
-    def __getToday(self):
-        return datetime.now(pytz.timezone('Europe/Oslo'))
-
 class ViatrumfSpider(scrapy.Spider):
     name = 'viatrumf'
     allowed_domains = ['viatrumf.no']
@@ -71,16 +47,24 @@ class ViatrumfSpider(scrapy.Spider):
     def parse(self, response):
         try: 
             url = '{top_url}/{username}'.format(top_url=self.top_url, username=self.target_username)
-            return scrapy.Request(url, callback=self._parseAndPersist)
+            return scrapy.Request(url, callback=self.__parseAndPersist)
         except Exception as e:
             print(e)
 
-    def _parseAndPersist(self, response):
-        nettbutikkar = ClutterTrimmer().trimAwayClutter(response.body.decode('unicode_escape'))
+    def __trimAwayClutter(self, body):
+        soup = BeautifulSoup(body, 'html.parser')
+        butikkar = []
+        for nettbutikk in soup.find_all('a', class_='shop-button'):
+            if not nettbutikk.attrs['data-name'] == 'zzzz':
+                butikkar.append(Nettbutikk(nettbutikk))
+        return butikkar
+
+    def __parseAndPersist(self, response):
+        nettbutikkar = self.__trimAwayClutter(response.body.decode('unicode_escape'))
         
-        persister = Persister()
+        self.tidspunkt = datetime.now(pytz.timezone('Europe/Oslo')).strftime('%Y%m%dT%H%M%S')
         for nettbutikk in nettbutikkar:
-            persister.save(self.__toPersistable(nettbutikk))
+            self.__save(self.__toPersistable(nettbutikk))
 
     def __toPersistable(self, nettbutikk):
         persistable = {}
@@ -88,7 +72,13 @@ class ViatrumfSpider(scrapy.Spider):
         persistable['verdi'] = nettbutikk.verdi
         persistable['href'] = nettbutikk.href
         persistable['popularitet'] = nettbutikk.popularitet
+        persistable['timestamp'] = self.tidspunkt
         return persistable
+    
+    def __save(self, nettbutikk):
+        name = nettbutikk['namn'].replace(' ', '_') + "_" + self.tidspunkt + '.json'
+        doc_ref = db.collection('viatrumf-scraper').document(name)
+        doc_ref.set(nettbutikk)
 
 def fetch():
     runner = crawler.CrawlerRunner({
