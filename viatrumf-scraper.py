@@ -13,7 +13,8 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 
-runningLocally = eval(getenv('runningLocally', True))
+envValue = getenv('runningLocally', True)
+runningLocally = True == envValue
 
 if runningLocally:
     cred = credentials.Certificate('viatrumf-scraper-271913-1e8fcedf7e5b.json')
@@ -52,7 +53,8 @@ class ViatrumfSpider(scrapy.Spider):
     def __trimAwayClutter(self, body):
         soup = BeautifulSoup(body, 'html.parser')
         butikkar = []
-        for nettbutikk in soup.find_all('a', class_='shop-button'):
+        nettbutikkar = soup.find_all('a', class_='shop-button')
+        for nettbutikk in nettbutikkar:
             if not nettbutikk.attrs['data-name'] == 'zzzz':
                 butikkar.append(Nettbutikk(nettbutikk))
         return butikkar
@@ -75,8 +77,9 @@ class ViatrumfSpider(scrapy.Spider):
         return persistable
     
     def __save(self, nettbutikk):
-        name = nettbutikk['namn'].replace(' ', '_') + "_" + self.tidspunkt + '.json'
-        doc_ref = db.collection('viatrumf-scraper').document(name)
+        namn = nettbutikk['namn'].replace(' ', '_').replace('\'', '')
+        name = namn + "_" + self.tidspunkt + '.json'
+        doc_ref = db.collection('viatrumf-scraper2').document(namn).collection('innslag').document(name)
         doc_ref.set(nettbutikk)
 
 def run(d, f):
@@ -84,7 +87,7 @@ def run(d, f):
         'USER_AGENT': 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
     })
     
-    kategoriar = ['reise', 'mote', 'sport', 'elektronikk', 'bolig', 'velvære', 'underholdning', 'barn', 'tjenester']
+    kategoriar = ['reise', 'mote-klær', 'sko', 'mote-tilbehør', 'sport', 'elektronikk', 'interiør', 'hus-og-hage', 'bil-og-motor', 'kjæledyr', 'skjønnhet', 'underholdning', 'barn', 'tjenester']
     
     for kategori in kategoriar:
         runner.crawl(ViatrumfSpider, kategori=kategori)
