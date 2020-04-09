@@ -37,7 +37,7 @@ class Nettbutikk:
 class ViatrumfSpider(scrapy.Spider):
     name = 'viatrumf'
     allowed_domains = ['viatrumf.no']
-    top_url = 'https://viatrumf.no/kategori'
+    top_url = 'https://viatrumf.no/'
     start_urls = ( top_url, )
 
     def __init__(self, kategori):
@@ -45,7 +45,7 @@ class ViatrumfSpider(scrapy.Spider):
 
     def parse(self, response):
         try: 
-            url = '{top_url}/{kategori}'.format(top_url=self.top_url, kategori=self.kategori)
+            url = '{top_url}/category/paged/{kategori}/100'.format(top_url=self.top_url, kategori=self.kategori)
             return scrapy.Request(url, callback=self.__parseAndPersist)
         except Exception as e:
             print(e)
