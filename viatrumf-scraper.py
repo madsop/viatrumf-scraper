@@ -61,7 +61,7 @@ class ViatrumfSpider(scrapy.Spider):
 
     def __parseAndPersist(self, response):
         nettbutikkar = self.__trimAwayClutter(response.body.decode('unicode_escape'))
-        print('Fann ' + len(nettbutikkar) ' nettbutikkar')
+        print(len(nettbutikkar))
 
         self.tidspunkt = datetime.now(pytz.timezone('Europe/Oslo')).strftime('%Y%m%dT%H%M%SZ')
         for nettbutikk in nettbutikkar:
@@ -83,7 +83,7 @@ class ViatrumfSpider(scrapy.Spider):
         doc_ref.set(nettbutikk)
 
 def run(d, f):
-    print('Startar køyring')
+    print('Startar sjølve køyringa')
     runner = crawler.CrawlerRunner({
         'USER_AGENT': 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
     })
