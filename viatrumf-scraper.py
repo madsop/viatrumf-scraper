@@ -23,7 +23,9 @@ else:
     cred = credentials.ApplicationDefault()
     firebase_admin.initialize_app()
 
+print('Running')
 db = firestore.client()
+print('Finished connecting to Firestore')
 
 
 class Nettbutikk:
@@ -83,6 +85,7 @@ class ViatrumfSpider(scrapy.Spider):
         doc_ref.set(nettbutikk)
 
 def run(d, f):
+    print('Starter køyring')
     runner = crawler.CrawlerRunner({
         'USER_AGENT': 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
     })
@@ -95,6 +98,7 @@ def run(d, f):
     d = runner.join()
     d.addBoth(lambda _: reactor.stop())
     reactor.run()
+    print('Ferdig køyrd')
 
 if runningLocally:
     try:
