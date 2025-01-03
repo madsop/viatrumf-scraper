@@ -23,9 +23,9 @@ else:
     cred = credentials.ApplicationDefault()
     firebase_admin.initialize_app()
 
-print('Running')
+print('Startar køyring')
 db = firestore.client()
-print('Finished connecting to Firestore')
+print('Ferdig oppkopla mot Firestore')
 
 
 class Nettbutikk:
@@ -43,12 +43,9 @@ class ViatrumfSpider(scrapy.Spider):
     top_url = 'https://' + base_url + '/'
     start_urls = ( top_url, )
 
-    def __init__(self, kategori):
-        self.kategori = kategori 
-
     def parse(self, response):
-        try: 
-            url = '{top_url}/category/paged/{kategori}/100'.format(top_url=self.top_url, kategori=self.kategori)
+        try:
+            url = '{top_url}/category/paged/all/500'.format(top_url=self.top_url)
             return scrapy.Request(url, callback=self.__parseAndPersist)
         except Exception as e:
             print(e)
@@ -64,7 +61,8 @@ class ViatrumfSpider(scrapy.Spider):
 
     def __parseAndPersist(self, response):
         nettbutikkar = self.__trimAwayClutter(response.body.decode('unicode_escape'))
-        
+        print('Fann ' + len(nettbutikkar) ' nettbutikkar')
+
         self.tidspunkt = datetime.now(pytz.timezone('Europe/Oslo')).strftime('%Y%m%dT%H%M%SZ')
         for nettbutikk in nettbutikkar:
             self.__save(self.__toPersistable(nettbutikk))
@@ -76,9 +74,8 @@ class ViatrumfSpider(scrapy.Spider):
         persistable['href'] = nettbutikk.href
         persistable['popularitet'] = nettbutikk.popularitet
         persistable['timestamp'] = self.tidspunkt
-        persistable['kategori'] = self.kategori
         return persistable
-    
+
     def __save(self, nettbutikk):
         namn = nettbutikk['namn'].replace(' ', '_').replace('\'', '')
         name = namn + "_" + self.tidspunkt + '.json'
@@ -86,15 +83,12 @@ class ViatrumfSpider(scrapy.Spider):
         doc_ref.set(nettbutikk)
 
 def run(d, f):
-    print('Starter køyring')
+    print('Startar køyring')
     runner = crawler.CrawlerRunner({
         'USER_AGENT': 'Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
     })
-    
-    kategoriar = ['reise', 'mote-klær', 'sko', 'mote-tilbehør', 'sport', 'elektronikk', 'interiør', 'hus-og-hage', 'bil-og-motor', 'kjæledyr', 'skjønnhet', 'underholdning', 'barn', 'tjenester']
-    
-    for kategori in kategoriar:
-        runner.crawl(ViatrumfSpider, kategori=kategori)
+
+    runner.crawl(ViatrumfSpider)
 
     d = runner.join()
     d.addBoth(lambda _: reactor.stop())
