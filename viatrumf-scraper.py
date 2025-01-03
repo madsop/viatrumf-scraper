@@ -92,7 +92,7 @@ def run(d, f):
 
     d = runner.join()
     d.addBoth(lambda _: reactor.stop())
-    reactor.run()
+    reactor.run(0)
     print('Ferdig køyrd')
 
 if runningLocally:
