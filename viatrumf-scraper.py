@@ -38,8 +38,9 @@ class Nettbutikk:
 
 class ViatrumfSpider(scrapy.Spider):
     name = 'viatrumf'
-    allowed_domains = ['viatrumf.no']
-    top_url = 'https://viatrumf.no/'
+    base_url = 'trumfnetthandel.no'
+    allowed_domains = [base_url]
+    top_url = 'https://' + base_url + '/'
     start_urls = ( top_url, )
 
     def __init__(self, kategori):
@@ -55,7 +56,7 @@ class ViatrumfSpider(scrapy.Spider):
     def __trimAwayClutter(self, body):
         soup = BeautifulSoup(body, 'html.parser')
         butikkar = []
-        nettbutikkar = soup.find_all('a', class_='shop-button')
+        nettbutikkar = soup.find_all('a', class_='merchant-tile')
         for nettbutikk in nettbutikkar:
             if not nettbutikk.attrs['data-name'] == 'zzzz':
                 butikkar.append(Nettbutikk(nettbutikk))
