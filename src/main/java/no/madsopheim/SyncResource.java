@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.bouncycastle.cert.ocsp.Req;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -17,14 +18,14 @@ public class SyncResource {
     @GET
     @Path("/synkroniserGet")
     public String synkroniserSomGet() {
-        return synkroniser(new Object());
+        return synkroniser(new Request("get-kallet"));
     }
 
     @POST
     @Path("/synkroniser")
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String synkroniser(Object request) {
+    public String synkroniser(Request request) {
         IO.println("Starter sync");
         try {
             synkroniserer.synkroniser();
