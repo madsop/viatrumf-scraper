@@ -24,6 +24,7 @@ class Synkroniserer {
     @PostConstruct
     void init() {
         formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'");
+        IO.println("Bruker lagring " + lagring.getClass().getSimpleName());
     }
 
     private DateTimeFormatter formatter;
