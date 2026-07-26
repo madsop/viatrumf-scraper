@@ -6,3 +6,15 @@ updates:
     interval: daily
     time: "04:00"
   open-pull-requests-limit: 99
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 15
+- package-ecosystem: docker
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:30"
+  open-pull-requests-limit: 5
