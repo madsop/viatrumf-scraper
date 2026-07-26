@@ -1,10 +1,7 @@
 package no.madsopheim;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
 import java.io.IOException;
@@ -18,12 +15,13 @@ public class SyncResource {
 
     @GET
     public String synkroniserSomGet() {
-        return synkroniser();
+        return synkroniser(new Object());
     }
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public String synkroniser() {
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String synkroniser(Object request) {
         IO.println("Starter sync");
         try {
             synkroniserer.synkroniser();
