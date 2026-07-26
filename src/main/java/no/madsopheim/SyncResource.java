@@ -1,5 +1,6 @@
 package no.madsopheim;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -7,18 +8,20 @@ import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-@Path("/synkroniser")
+@ApplicationScoped
 public class SyncResource {
 
     @Inject
     Synkroniserer synkroniserer;
 
     @GET
+    @Path("/synkroniserGet")
     public String synkroniserSomGet() {
         return synkroniser(new Object());
     }
 
     @POST
+    @Path("/synkroniser")
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
     public String synkroniser(Object request) {
