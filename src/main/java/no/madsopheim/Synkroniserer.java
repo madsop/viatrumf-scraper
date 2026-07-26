@@ -1,5 +1,7 @@
 package no.madsopheim;
 
+import com.google.api.core.ApiFuture;
+import com.google.api.core.ApiFutures;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -10,6 +12,10 @@ import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Dependent
 class Synkroniserer {
@@ -29,12 +35,15 @@ class Synkroniserer {
 
     private DateTimeFormatter formatter;
 
-    void synkroniser() throws IOException {
+    void synkroniser() throws IOException, ExecutionException, InterruptedException {
         var no = ZonedDateTime.now(ZoneId.of(tidssone));
+        var futures = new ArrayList<ApiFuture<?>>();
         for (Element butikk : Jsoup.connect(url).get().select(selectFilter)) {
             Innslag innslag = formaterInnslag(butikk, no);
-            lagring.lagre(innslag);
+            futures.add(lagring.lagre(innslag));
         }
+        IO.println("Håndterer " + futures.size() + " innslag");
+        ApiFutures.allAsList(futures.stream().filter(Objects::nonNull).collect(Collectors.toList())).get();
     }
 
     private Innslag formaterInnslag(Element butikk, ZonedDateTime no) {

@@ -1,5 +1,7 @@
 package no.madsopheim;
 
+import com.google.api.core.ApiFuture;
+
 public interface Lagring {
-    void lagre(Innslag innslag);
+    ApiFuture<?> lagre(Innslag innslag);
 }

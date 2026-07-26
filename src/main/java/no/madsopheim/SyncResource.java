@@ -7,6 +7,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @Path("/synkroniser")
 public class SyncResource {
@@ -21,7 +22,7 @@ public class SyncResource {
         try {
             synkroniserer.synkroniser();
             IO.println("Ferdig med synk");
-        } catch (IOException e) {
+        } catch (IOException | ExecutionException | InterruptedException e) {
             IO.println("Feila under synkronisering");
             e.printStackTrace();
             throw new RuntimeException(e);

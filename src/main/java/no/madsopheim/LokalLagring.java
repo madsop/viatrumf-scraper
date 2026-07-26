@@ -1,5 +1,6 @@
 package no.madsopheim;
 
+import com.google.api.core.ApiFuture;
 import io.quarkus.arc.profile.IfBuildProfile;
 import jakarta.enterprise.context.Dependent;
 
@@ -7,7 +8,7 @@ import jakarta.enterprise.context.Dependent;
 @IfBuildProfile("dev")
 public class LokalLagring implements Lagring {
     @Override
-    public void lagre(Innslag innslag) {
-
+    public ApiFuture<?> lagre(Innslag innslag) {
+        return null;
     }
 }
