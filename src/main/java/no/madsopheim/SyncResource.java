@@ -1,6 +1,7 @@
 package no.madsopheim;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -15,13 +16,19 @@ public class SyncResource {
     @Inject
     Synkroniserer synkroniserer;
 
+    @GET
+    public String synkroniserSomGet() {
+        return synkroniser();
+    }
+
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    public void synkroniser() {
+    public String synkroniser() {
         IO.println("Starter sync");
         try {
             synkroniserer.synkroniser();
             IO.println("Ferdig med synk");
+            return "Ferdig med synk";
         } catch (IOException | ExecutionException | InterruptedException e) {
             IO.println("Feila under synkronisering");
             e.printStackTrace();
