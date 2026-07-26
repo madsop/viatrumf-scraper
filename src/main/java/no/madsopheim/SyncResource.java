@@ -4,12 +4,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import org.bouncycastle.cert.ocsp.Req;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 @ApplicationScoped
+@Path("/")
 public class SyncResource {
 
     @Inject
@@ -26,7 +26,7 @@ public class SyncResource {
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
     public String synkroniser(Request request) {
-        IO.println("Starter sync");
+        IO.println("Starter sync med request " + request.source());
         try {
             synkroniserer.synkroniser();
             IO.println("Ferdig med synk");
