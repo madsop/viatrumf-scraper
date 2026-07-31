@@ -22,7 +22,7 @@ record SASOnlineShoppingResponse(List<Shop> data) {}
 record Shop(
         UUID uuid,
         String name,
-        String commissionType,
+        String commission_type,
         String currency,
         Double points,
         String campaign_ends_date,

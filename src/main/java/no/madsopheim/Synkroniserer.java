@@ -83,7 +83,7 @@ class Synkroniserer {
             return new SASOnlineShop(
                     shop.name(),
                     "https://onlineshopping.flysas.com/nb-NO/butikker/" + shop.name().replace(" ", "-") + "/" + shop.uuid(),
-                    formaterCommissionType(shop.commissionType()),
+                    formaterCommissionType(shop.commission_type()),
                     formaterCurrency(shop.currency()),
                     shop.points(),
                     Optional.ofNullable(shop.campaign_ends_date()).map(d -> LocalDate.parse(d, sasOnlineShoppingFormatter)).orElse(null),
@@ -99,10 +99,10 @@ class Synkroniserer {
     }
 
     private CommissionType formaterCommissionType(String commissionType) {
-        if (commissionType.equals("fixed")) {
+        if ("fixed".equals(commissionType)) {
             return CommissionType.fixed;
         }
-        if (commissionType.equals("variable")) {
+        if ("variable".equals(commissionType)) {
             return CommissionType.variable;
         }
         throw new IllegalArgumentException("Forventa ikke å få commission type som ikkje var fixed eller variable, var " + commissionType);
