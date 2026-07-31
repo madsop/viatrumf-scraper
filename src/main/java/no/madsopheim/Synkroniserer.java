@@ -83,7 +83,7 @@ class Synkroniserer {
             return new SASOnlineShop(
                     shop.name(),
                     "https://onlineshopping.flysas.com/nb-NO/butikker/" + shop.name().replace(" ", "-") + "/" + shop.uuid(),
-                    shop.commissionType(),
+                    formaterCommissionType(shop.commissionType()),
                     formaterCurrency(shop.currency()),
                     shop.points(),
                     Optional.ofNullable(shop.campaign_ends_date()).map(d -> LocalDate.parse(d, sasOnlineShoppingFormatter)).orElse(null),
@@ -96,6 +96,16 @@ class Synkroniserer {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    private CommissionType formaterCommissionType(String commissionType) {
+        if (commissionType.equals("fixed")) {
+            return CommissionType.fixed;
+        }
+        if (commissionType.equals("variable")) {
+            return CommissionType.variable;
+        }
+        throw new IllegalArgumentException("Forventa ikke å få commission type som ikkje var fixed eller variable, var " + commissionType);
     }
 
     private Currency formaterCurrency(String currency) {
@@ -126,6 +136,11 @@ record SASOnlineShop(
         Double pointsChannel,
         String timestamp
 ) implements Innslag {}
+
+enum CommissionType {
+    fixed,
+    variable
+}
 
 enum Currency {
     PROSENT,

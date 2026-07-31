@@ -22,15 +22,10 @@ record SASOnlineShoppingResponse(List<Shop> data) {}
 record Shop(
         UUID uuid,
         String name,
-        CommissionType commissionType,
+        String commissionType,
         String currency,
         Double points,
         String campaign_ends_date,
         Double points_campaign,
         Double points_channel
 ) {}
-
-enum CommissionType {
-    fixed,
-    variable
-}
