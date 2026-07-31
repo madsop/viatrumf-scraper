@@ -1,4 +1,4 @@
-package no.madsopheim;
+package no.madsopheim.sasonlineshopping;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.ws.rs.GET;

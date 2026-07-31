@@ -1,10 +1,11 @@
-package no.madsopheim;
+package no.madsopheim.trumfnetthandel;
 
 import com.google.api.core.ApiFuture;
 import com.google.api.core.ApiFutures;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.madsopheim.Innslag;
 import no.madsopheim.lagring.Lagring;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jsoup.Jsoup;

@@ -1,4 +1,6 @@
-package no.madsopheim;
+package no.madsopheim.trumfnetthandel;
+
+import no.madsopheim.Innslag;
 
 public record TrumfNetthandelInnslag(
         String namn,
