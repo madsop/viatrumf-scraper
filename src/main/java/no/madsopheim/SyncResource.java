@@ -13,7 +13,10 @@ import java.util.concurrent.ExecutionException;
 public class SyncResource {
 
     @Inject
-    Synkroniserer synkroniserer;
+    SASOnlineShoppingService sasOnlineShoppingService;
+
+    @Inject
+    TrumfNetthandelService trumfNetthandelService;
 
     @GET
     @Path("/synkroniserGet")
@@ -28,7 +31,12 @@ public class SyncResource {
     public String synkroniser(Request request) {
         IO.println("Starter sync med request " + request.source());
         try {
-            synkroniserer.synkroniser();
+            IO.println("Starter å synkronisere SAS Online Shopping");
+            sasOnlineShoppingService.synkroniserSASOnlineShopping();
+            IO.println("Ferdig med å synkronisere SAS Online Shopping");
+            IO.println("Starter synkronisering av Trumf Netthandel");
+            trumfNetthandelService.synkroniserTrumfNetthandel();
+            IO.println("Ferdig med å synkronisere Trumf Netthandel");
             IO.println("Ferdig med synk");
             return "Ferdig med synk";
         } catch (IOException | ExecutionException | InterruptedException e) {
