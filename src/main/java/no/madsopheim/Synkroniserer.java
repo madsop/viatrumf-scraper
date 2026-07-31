@@ -11,13 +11,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,12 +34,10 @@ class Synkroniserer {
     @PostConstruct
     void init() {
         formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'");
-        sasOnlineShoppingFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         IO.println("Bruker lagring " + lagring.getClass().getSimpleName());
     }
 
     private DateTimeFormatter formatter;
-    private DateTimeFormatter sasOnlineShoppingFormatter;
 
     void synkroniser() throws IOException, ExecutionException, InterruptedException {
         IO.println("Starter å synkronisere SAS Online Shopping");
@@ -86,7 +82,7 @@ class Synkroniserer {
                     formaterCommissionType(shop.commission_type()),
                     formaterCurrency(shop.currency()),
                     shop.points(),
-                    Optional.ofNullable(shop.campaign_ends_date()).map(d -> LocalDate.parse(d, sasOnlineShoppingFormatter)).orElse(null),
+                    shop.campaign_ends_date(),
                     shop.points_campaign(),
                     shop.points(),
                     no.format(formatter)
@@ -131,7 +127,7 @@ record SASOnlineShop(
         CommissionType commissionType,
         Currency currency,
         Double points,
-        LocalDate campaignEndsDate,
+        String campaignEndsDate,
         Double pointsCampaign,
         Double pointsChannel,
         String timestamp
