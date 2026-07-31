@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -41,14 +42,14 @@ class Synkroniserer {
     }
 
     private void synkroniserTrumfNetthandel() throws IOException, ExecutionException, InterruptedException {
-        synkroniser("a.merchant-tile", "https://trumfnetthandel.no/category/paged/all/500", "viatrumf-scraper2");
+        synkroniser("a.merchant-tile", "https://trumfnetthandel.no/category/paged/all/500", "viatrumf-scraper2", this::formaterTrumfNetthandelInnslag);
     }
 
-    private void synkroniser(String selectFilter, String url, String collectionNamn) throws IOException, ExecutionException, InterruptedException {
+    private <T extends Innslag> void synkroniser(String selectFilter, String url, String collectionNamn, BiFunction<Element, ZonedDateTime, T> biFunction) throws IOException, ExecutionException, InterruptedException {
         var no = ZonedDateTime.now(ZoneId.of(tidssone));
         var futures = new ArrayList<ApiFuture<?>>();
         for (Element butikk : Jsoup.connect(url).get().select(selectFilter)) {
-            Innslag innslag = formaterTrumfNetthandelInnslag(butikk, no);
+            Innslag innslag = biFunction.apply(butikk, no);
             futures.add(lagring.lagre(innslag, collectionNamn));
         }
         IO.println("Håndterer " + futures.size() + " innslag");
