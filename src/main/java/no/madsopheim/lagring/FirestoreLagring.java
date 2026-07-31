@@ -19,10 +19,16 @@ public class FirestoreLagring implements Lagring {
 
     @Override
     public ApiFuture<WriteResult> lagre(Innslag innslag, String collectionNamn) {
+        try {
         String escapedNamn = innslag.namn().replace(" ", "_").replace("'", "");
         CollectionReference collection = firestore.collection(collectionNamn);
         IO.println("Lagrer " + escapedNamn);
         DocumentReference document = collection.document(escapedNamn).collection("innslag").document(escapedNamn + "_" + innslag.timestamp() + ".json");
         return document.set(innslag);
+        } catch (Exception e) {
+            IO.println("Feila under lagring til firestore for " + innslag.namn());
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 }

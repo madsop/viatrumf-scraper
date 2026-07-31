@@ -79,17 +79,23 @@ class Synkroniserer {
     }
 
     private SASOnlineShop konverterSASOnlineShop(Shop shop, ZonedDateTime no) {
-        return new SASOnlineShop(
-                shop.name(),
-                "https://onlineshopping.flysas.com/nb-NO/butikker/" + shop.name().replace(" ", "-") + "/" + shop.uuid(),
-                shop.commissionType(),
-                formaterCurrency(shop.currency()),
-                shop.points(),
-                Optional.ofNullable(shop.campaign_ends_date()).map(d -> LocalDate.parse(d, sasOnlineShoppingFormatter)).orElse(null),
-                shop.points_campaign(),
-                shop.points(),
-                no.format(formatter)
-        );
+        try {
+            return new SASOnlineShop(
+                    shop.name(),
+                    "https://onlineshopping.flysas.com/nb-NO/butikker/" + shop.name().replace(" ", "-") + "/" + shop.uuid(),
+                    shop.commissionType(),
+                    formaterCurrency(shop.currency()),
+                    shop.points(),
+                    Optional.ofNullable(shop.campaign_ends_date()).map(d -> LocalDate.parse(d, sasOnlineShoppingFormatter)).orElse(null),
+                    shop.points_campaign(),
+                    shop.points(),
+                    no.format(formatter)
+            );
+        } catch (Exception e) {
+            IO.println("Feila under synkronisering av " + shop.name());
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     private Currency formaterCurrency(String currency) {
