@@ -85,7 +85,7 @@ class Synkroniserer {
                 shop.commissionType(),
                 formaterCurrency(shop.currency()),
                 shop.points(),
-                Optional.ofNullable(shop.campaign_ends_date()).map(d -> LocalDate.parse(d, sasOnlineShoppingFormatter)),
+                Optional.ofNullable(shop.campaign_ends_date()).map(d -> LocalDate.parse(d, sasOnlineShoppingFormatter)).orElse(null),
                 shop.points_campaign(),
                 shop.points(),
                 no.format(formatter)
@@ -115,7 +115,7 @@ record SASOnlineShop(
         CommissionType commissionType,
         Currency currency,
         Double points,
-        Optional<LocalDate> campaignEndsDate,
+        LocalDate campaignEndsDate,
         Double pointsCampaign,
         Double pointsChannel,
         String timestamp
