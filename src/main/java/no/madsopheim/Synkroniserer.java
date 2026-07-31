@@ -44,12 +44,12 @@ class Synkroniserer {
     private DateTimeFormatter sasOnlineShoppingFormatter;
 
     void synkroniser() throws IOException, ExecutionException, InterruptedException {
-        IO.println("Starter synkronisering av Trumf Netthandel");
-        synkroniserTrumfNetthandel();
-        IO.println("Ferdig med å synkronisere Trumf Netthandel");
         IO.println("Starter å synkronisere SAS Online Shopping");
         synkroniserSASOnlineShopping();
         IO.println("Ferdig med å synkronisere SAS Online Shopping");
+        IO.println("Starter synkronisering av Trumf Netthandel");
+        synkroniserTrumfNetthandel();
+        IO.println("Ferdig med å synkronisere Trumf Netthandel");
     }
 
     private void synkroniserTrumfNetthandel() throws IOException, ExecutionException, InterruptedException {
