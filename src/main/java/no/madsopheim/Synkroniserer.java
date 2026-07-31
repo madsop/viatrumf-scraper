@@ -6,15 +6,18 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.madsopheim.lagring.Lagring;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,20 +28,28 @@ class Synkroniserer {
     @Inject
     Lagring lagring;
 
+    @RestClient
+    SASOnlineShoppingClient sasOnlineShoppingClient;
+
     private static final String tidssone = "Europe/Oslo";
 
     @PostConstruct
     void init() {
         formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'");
+        sasOnlineShoppingFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         IO.println("Bruker lagring " + lagring.getClass().getSimpleName());
     }
 
     private DateTimeFormatter formatter;
+    private DateTimeFormatter sasOnlineShoppingFormatter;
 
     void synkroniser() throws IOException, ExecutionException, InterruptedException {
         IO.println("Starter synkronisering av Trumf Netthandel");
         synkroniserTrumfNetthandel();
         IO.println("Ferdig med å synkronisere Trumf Netthandel");
+        IO.println("Starter å synkronisere SAS Online Shopping");
+        synkroniserSASOnlineShopping();
+        IO.println("Ferdig med å synkronisere SAS Online Shopping");
     }
 
     private void synkroniserTrumfNetthandel() throws IOException, ExecutionException, InterruptedException {
@@ -55,6 +66,41 @@ class Synkroniserer {
         IO.println("Håndterer " + futures.size() + " innslag");
         ApiFutures.allAsList(futures.stream().filter(Objects::nonNull).collect(Collectors.toList())).get();
     }
+
+    private void synkroniserSASOnlineShopping() throws ExecutionException, InterruptedException {
+        var no = ZonedDateTime.now(ZoneId.of(tidssone));
+        String collectionNamn = "sasOnlineShopping";
+        SASOnlineShoppingResponse response = sasOnlineShoppingClient.getSASOnlineShopping();
+        IO.println("Fikk " + response.data().size() + " innslag i SAS Online Shopping");
+        var futures = response.data().stream()
+                .map(s -> konverterSASOnlineShop(s, no))
+                .map(s -> lagring.lagre(s, collectionNamn));
+        ApiFutures.allAsList(futures.filter(Objects::nonNull).collect(Collectors.toList())).get();
+    }
+
+    private SASOnlineShop konverterSASOnlineShop(Shop shop, ZonedDateTime no) {
+        return new SASOnlineShop(
+                shop.name(),
+                "https://onlineshopping.flysas.com/nb-NO/butikker/" + shop.name().replace(" ", "-") + "/" + shop.uuid(),
+                shop.commissionType(),
+                formaterCurrency(shop.currency()),
+                shop.points(),
+                Optional.ofNullable(shop.campaign_ends_date()).map(d -> LocalDate.parse(d, sasOnlineShoppingFormatter)),
+                shop.points_campaign(),
+                shop.points(),
+                no.format(formatter)
+        );
+    }
+
+    private Currency formaterCurrency(String currency) {
+        if (currency.equals("%")) {
+            return Currency.PROSENT;
+        }
+        if (currency.equals("NOK")) {
+            return Currency.NOK;
+        }
+        throw new IllegalArgumentException("Forventa ikke å få valuta som ikkje var prosent eller NOK, var " + currency);
+    }
 }
 
 record SynkroniseringInternalRequest(
@@ -62,3 +108,20 @@ record SynkroniseringInternalRequest(
     ZonedDateTime no,
     DateTimeFormatter formatter
 ) {}
+
+record SASOnlineShop(
+        String namn,
+        String href,
+        CommissionType commissionType,
+        Currency currency,
+        Double points,
+        Optional<LocalDate> campaignEndsDate,
+        Double pointsCampaign,
+        Double pointsChannel,
+        String timestamp
+) implements Innslag {}
+
+enum Currency {
+    PROSENT,
+    NOK
+}

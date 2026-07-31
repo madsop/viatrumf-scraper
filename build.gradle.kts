@@ -18,6 +18,7 @@ dependencies {
     implementation("io.quarkus:quarkus-rest")
     implementation("io.quarkiverse.googlecloudservices:quarkus-google-cloud-firestore")
     implementation("io.quarkus:quarkus-arc")
+    implementation("io.quarkus:quarkus-rest-client-jackson")
     testImplementation("io.quarkus:quarkus-junit")
     testImplementation("io.rest-assured:rest-assured")
     implementation("org.jsoup:jsoup:1.22.2")
