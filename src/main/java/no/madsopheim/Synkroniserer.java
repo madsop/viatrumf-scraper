@@ -5,6 +5,7 @@ import com.google.api.core.ApiFutures;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.madsopheim.lagring.Lagring;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
@@ -40,7 +41,7 @@ class Synkroniserer {
         var futures = new ArrayList<ApiFuture<?>>();
         for (Element butikk : Jsoup.connect(url).get().select(selectFilter)) {
             Innslag innslag = formaterInnslag(butikk, no);
-            futures.add(lagring.lagre(innslag));
+            futures.add(lagring.lagre(innslag, "viatrumf-scraper2"));
         }
         IO.println("Håndterer " + futures.size() + " innslag");
         ApiFutures.allAsList(futures.stream().filter(Objects::nonNull).collect(Collectors.toList())).get();
