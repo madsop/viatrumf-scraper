@@ -1,8 +1,8 @@
 package no.madsopheim.lagring;
 
 import com.google.api.core.ApiFuture;
-import no.madsopheim.TrumfNetthandelInnslag;
+import no.madsopheim.Innslag;
 
 public interface Lagring {
-    ApiFuture<?> lagre(TrumfNetthandelInnslag innslag, String collectionNamn);
+    ApiFuture<?> lagre(Innslag innslag, String collectionNamn);
 }

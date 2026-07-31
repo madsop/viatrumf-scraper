@@ -6,5 +6,5 @@ public record TrumfNetthandelInnslag(
         String href,
         String popularitet,
         String timestamp
-) {
+) implements Innslag {
 }
