@@ -8,7 +8,7 @@ import com.google.cloud.firestore.WriteResult;
 import io.quarkus.arc.profile.UnlessBuildProfile;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.madsopheim.Innslag;
+import no.madsopheim.TrumfNetthandelInnslag;
 
 @Dependent
 @UnlessBuildProfile("dev")
@@ -18,7 +18,7 @@ public class FirestoreLagring implements Lagring {
     Firestore firestore;
 
     @Override
-    public ApiFuture<WriteResult> lagre(Innslag innslag, String collectionNamn) {
+    public ApiFuture<WriteResult> lagre(TrumfNetthandelInnslag innslag, String collectionNamn) {
         String escapedNamn = innslag.namn().replace(" ", "_").replace("'", "");
         CollectionReference collection = firestore.collection(collectionNamn);
         IO.println("Lagrer " + escapedNamn);

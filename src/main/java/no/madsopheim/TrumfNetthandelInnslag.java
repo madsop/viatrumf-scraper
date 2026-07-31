@@ -1,6 +1,6 @@
 package no.madsopheim;
 
-public record Innslag(
+public record TrumfNetthandelInnslag(
         String namn,
         String verdi,
         String href,
