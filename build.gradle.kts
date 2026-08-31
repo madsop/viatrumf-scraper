@@ -21,7 +21,7 @@ dependencies {
     implementation("io.quarkus:quarkus-rest-client-jackson")
     testImplementation("io.quarkus:quarkus-junit")
     testImplementation("io.rest-assured:rest-assured")
-    implementation("org.jsoup:jsoup:1.22.2")
+    implementation("org.jsoup:jsoup:1.23.2")
 }
 
 group = "no.madsopheim"
